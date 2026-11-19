@@ -1,5 +1,7 @@
 build
 build_env
 dist
-smartnav
+/smartnav
 smartnav.spec
+__pycache__/
+release/

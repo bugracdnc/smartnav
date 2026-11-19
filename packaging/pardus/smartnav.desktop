@@ -1,0 +1,14 @@
+[Desktop Entry]
+Type=Application
+Name=SmartNav
+Name[tr]=SmartNav
+GenericName=Slide navigation buttons
+GenericName[tr]=Sunum gezinme düğmeleri
+Comment=Always-on-top ◀ ▶ buttons for presentations and PDFs on smart boards
+Comment[tr]=Akıllı tahtada sunum ve PDF'lerde ileri/geri için her zaman üstte duran düğmeler
+Exec=@EXEC@
+Icon=@ICON@
+Terminal=false
+Categories=Education;Utility;
+Keywords=presentation;slides;pdf;smartboard;sunum;slayt;tahta;etap;
+StartupNotify=false
