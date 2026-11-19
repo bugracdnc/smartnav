@@ -1,73 +1,60 @@
-# Pardus Akıllı Tahta Navigasyon Aracı
+# SmartNav
 
-## Açıklama
+[![CI](https://github.com/bugracdnc/smartnav/actions/workflows/ci.yml/badge.svg)](https://github.com/bugracdnc/smartnav/actions/workflows/ci.yml)
 
-Pardus ve ETAP (Etkileşimli Tahta Arayüzü Projesi) kurulu akıllı tahtalarda sunumlar, PDF belgeleri ve web sayfaları arasında geçiş yapmayı kolaylaştırmak amacıyla geliştirilmiş bir yardımcı araçtır. Ekranın en üstünde (always-on-top) sabitlenen küçük bir dikdörtgen widget aracılığıyla, fiziksel klavyeye ihtiyaç duymadan sol ve sağ yön tuşu komutları gönderilmesini sağlar. Dokunmatik ekranlarla tam uyumludur, çerçevesiz tasarımıyla dikkat dağıtmaz ve ekran üzerinde istenilen konuma sürüklenebilir.
+Pardus ve ETAP akıllı tahtalarda sunum, PDF ve web sayfalarında ileri/geri gitmek için **her zaman üstte duran ◀ ▶ düğmeleri**. Klavyeye uzanmadan, dokunarak slayt değiştirin.
 
-## Kullanılan Teknolojiler
+*Always-on-top, touch-friendly ◀ ▶ buttons that send Left/Right key presses, for presentations on Pardus/ETAP smart boards.*
 
-- **Python 3:** Uygulama mantığının geliştirilmesi.
-- **Tkinter:** Hafif ve hızlı grafik kullanıcı arayüzü (GUI) oluşturma.
-- **xdotool:** İşletim sistemi seviyesinde yerel klavye vuruşlarını simüle etme.
+![SmartNav](docs/smartnav.png)
 
-- **PyInstaller:** (İsteğe bağlı) Betiği tek bir çalıştırılabilir (binary) dosyaya dönüştürme.
+## Kurulum
 
-## Kurulum Kılavuzu
+**Yönetici şifresi gerekmez.** Uçbirimi (Terminal) açıp:
 
-Uygulamanın çalışması için sistemde Python 3'ün yanı sıra grafik arayüz kütüphanesi ve klavye simülasyon aracının yüklü olması gerekir.
-
-### Kurulum Gereksinimleri
-
-Pardus terminalini açarak aşağıdaki komutları çalıştırınız:
-
-```bash
-sudo apt update
-sudo apt install python3 python3-tk xdotool
+```sh
+wget -qO- https://raw.githubusercontent.com/bugracdnc/smartnav/main/packaging/pardus/kur.sh | sh
 ```
 
-## Uygulamayı Çalıştırma
+- **İnternetsiz / USB ile:** [Sürümler](https://github.com/bugracdnc/smartnav/releases) sayfasından `smartnav-pardus.tar.gz` dosyasını indirin, USB'ye koyun. Tahtada açıp klasörün içindeki `kur.sh`'yi çalıştırın (`sh kur.sh`).
+- **Paket olarak (yönetici varsa):** `.deb` dosyasını indirip çift tıklayın.
+- **Kaldırmak:** `sh ~/.local/share/smartnav/kaldir.sh`
 
-Kaynak kodu üzerinden çalıştırmak için:
+Güncellemek için kurulumu yeniden çalıştırın; ayarlarınız korunur.
 
-```bash
-python3 smartboard_nav.py
+## Kullanım
+
+- **◀ / ▶** önceki / sonraki slayt (sol/sağ ok tuşu gönderir; LibreOffice Impress, PDF görüntüleyiciler ve tarayıcıda çalışır).
+- Üst çubuktan tutup **sürükleyin**; konum hatırlanır.
+- **⚙** ayar dosyasını açar, **✕** kapatır.
+
+`~/.config/smartnav/config.ini`:
+
+```ini
+[Display]
+scale = auto          ; auto = ekran yüksekliğine göre (4K tahtada 2x), ya da 1.5 gibi bir sayı
+resolution = auto     ; ya da 300x120
+
+[Keys]
+previous = Left       ; bazı programlar için Prior / Next (Page Up / Page Down)
+next = Right
 ```
 
-## PyInstaller ile Derleme (Binary) Kılavuzu
+## Gereksinimler
 
-Uygulamayı Python yüklü olmayan veya kod dosyalarıyla uğraşılmak istenmeyen tahtalara taşımak için tek bir executable dosyası oluşturabilirsiniz.
+X11 masaüstü oturumu (Pardus XFCE bu bilgisayarda X11 ile çalışıyor; ETAP tahtasında `echo $XDG_SESSION_TYPE` ile kontrol edebilirsiniz). Wayland oturumlarında tuş gönderilemez; düğmelerin yerinde bunu söyleyen bir uyarı görünür. Hazır derlenmiş dosya Python gerektirmez. `.deb` paketi sistemdeki `python3-tk`'yı kullanır.
 
-Bağımlılıkları izole etmek için bir sanal ortam oluşturun ve aktif edin:
+## Geliştirme
 
-```bash
-python3 -m venv build_env
-source build_env/bin/activate
+```sh
+python3 smartnav.py                    # çalıştır
+python3 -m unittest -v                 # testler
+SMARTNAV_X_TEST=1 xvfb-run -a python3 -m unittest -v   # gerçek tuş gönderimi testi dahil
+sh scripts/release.sh                  # release/: binary, .deb, USB paketi (podman/docker gerekir)
 ```
 
-Gerekli paketleme aracını yükleyin:
+Sürüm yayınlamak: `smartnav.py` içindeki `__version__`'ı artırıp `git tag v1.0.0 && git push --tags`. CI dosyaları sürüme ekler.
 
-```bash
-pip install pyinstaller
-```
+---
 
-ya da eğer Python paketleri sistem tarafından yönetiliyor ise, oluşturduğumuz sanal ortamdaki paketleri bağımsız şekilde pip ile yükleyebilmek için bunu kullanın:
-
-```bash
-pip install pyinstaller --break-system-packages
-```
-
-Uygulamayı, arka plan terminali açılmayacak ve tek dosya olacak şekilde derleyin:
-
-```bash
-pyinstaller --onefile --noconsole smartboard_nav.py
-```
-
-Derleme tamamlandığında dist/ dizini içerisinde smartboard_nav isimli tek bir dosya oluşacaktır. Bu dosyayı herhangi bir Pardus tahtasına taşıyıp doğrudan çalıştırabilirsiniz.
-
-## Proje Notları ve Uyarılar
-
-Bu projede bulunan kodlar bir yapay zeka aracı ile (Gemini 3.1 Pro) hazırlanmış olup, bir insan tarafından derlenip test edilmiştir.
-
-Amacı, bir sanal klavye görevi görerek sunum esnasında slayt geçişlerini kolaylaştırmaktır.
-
-Akıllı tahtalarda kullanmadan önce sistem yöneticinize danışınız.
+İlk sürüm bir yapay zekâ aracıyla (Gemini) hazırlanıp bir insan tarafından denenmiştir; 1.0 sürümü Claude ile yeniden düzenlenip test edilmiştir. Kullanmadan önce okulunuzun BT sorumlusuna danışabilirsiniz.
